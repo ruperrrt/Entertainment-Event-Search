@@ -1,0 +1,425 @@
+
+
+ <div class="text-center container">
+		<button class="btn" [class.btn-primary]="show_results" [class.btn-link]="!show_results" (click)="clickResults()">Results</button>
+		<button class="btn" [class.btn-primary]="!show_results" [class.btn-link]="show_results" (click)="clickFavorites()">Favorites</button>
+  </div>
+  <br>
+
+  <div [hidden]="!showProgress2">
+      <br><br>
+      <div class="progress" >
+          <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+   </div>
+
+  <div *ngIf="events && events.length > 0"  class="ml-auto d-flex justify-content-end" >
+    <button  style="margin-bottom: 10px; display: flex" type="button" class="btn btn-light" (click)="clickDetail()" [hidden]="!show_table || !show_results" [disabled]="disableDetail" > <div>Details </div> <i class="material-icons" style="margin: auto" >chevron_right</i></button>
+  </div>
+
+  <table *ngIf="events && events.length > 0" mat-table [dataSource]="events" class="mat-elevation-z8" [hidden]="!show_table || !show_results" [@tabsAnimation]="!show_table ? 'detail' : 'event'">
+      <!-- Position Column -->
+      <ng-container matColumnDef="position">
+          <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> # </th>
+          <td mat-cell *matCellDef="let element; let i = index;"><b>{{i+1}}</b>  </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Date  </th>
+          <td mat-cell *matCellDef="let element"> {{element.date}} </td>
+        </ng-container>
+
+        <!-- Event Column -->
+        <ng-container matColumnDef="event">
+          <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Event </th>
+          <td mat-cell *matCellDef="let element; let i = index" matTooltip="{{element.event}}" (click)= "getDetails(element.id, element.event, element, i)">
+            <span class="event-blue-underline">{{element.event_abbr}}</span> </td>
+        </ng-container>
+
+        <!-- Category Column -->
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Category </th>
+          <td mat-cell *matCellDef="let element"> {{element.category}} </td>
+        </ng-container>
+
+        <!-- Venue Column -->
+        <ng-container matColumnDef="venue">
+            <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Venue Info </th>
+            <td mat-cell *matCellDef="let element"> {{element.venue_info}} </td>
+          </ng-container>
+
+        <!-- Venue Column -->
+        <ng-container matColumnDef="favorite">
+            <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Favorite </th>
+            <td mat-cell *matCellDef="let element">
+              <div (click)="clickFavorite2(element.id, element)" style="background:white; width: 44px;">
+                <div class="star-button" style="vertical-align:middle">
+                  <i *ngIf="favoriteMap.has(element.id)"  class="material-icons yellow-star" style="margin: auto" >star</i>
+                  <i *ngIf="!favoriteMap.has(element.id)"  class="material-icons ">star_border</i>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns; let i=index;" [ngClass]="{'selected': i == selectedNumber}"></tr>
+  </table>
+
+  <div *ngIf="events && events.length == 0" [hidden]="!show_table || !show_results" >
+   <br><br><br><br>
+    <div class="alert alert-warning" role="alert">
+      No records.
+    </div>
+   <br><br><br><br>
+  </div>
+
+  <table *ngIf="favoriteEvents && favoriteEvents.length > 0" mat-table [dataSource]="favoriteEvents" class="mat-elevation-z8" [hidden]="!show_table || show_results" [@tabsAnimation]="!show_table ? 'event' : 'detail' ">
+
+    <!-- Position Column -->
+    <ng-container matColumnDef="position">
+        <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> # </th>
+        <td mat-cell *matCellDef="let element; let i = index;"><b>{{i+1}}</b>  </td>
+      </ng-container>
+
+      <!-- Date Column -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Date  </th>
+        <td mat-cell *matCellDef="let element"> {{element.date}} </td>
+      </ng-container>
+
+      <!-- Event Column -->
+      <ng-container matColumnDef="event">
+        <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Event </th>
+        <td mat-cell *matCellDef="let element"  (click)= "getDetails(element.id, element.event, element)">
+          <span class="event-blue-underline"  matTooltip="{{element.event}}">{{element.event_abbr}}</span> </td>
+      </ng-container>
+
+      <!-- Category Column -->
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Category </th>
+        <td mat-cell *matCellDef="let element"> {{element.category}} </td>
+      </ng-container>
+
+      <!-- Venue Column -->
+      <ng-container matColumnDef="venue">
+          <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Venue Info </th>
+          <td mat-cell *matCellDef="let element"> {{element.venue_info}} </td>
+        </ng-container>
+
+      <!-- Venue Column -->
+      <ng-container matColumnDef="favorite">
+          <th mat-header-cell *matHeaderCellDef style="font-size: medium; color: black; font-weight: 500;"> Favorite </th>
+          <td mat-cell *matCellDef="let element" (click)="clickFavorite2(element.id, element)">
+            <div (click)="clickFavorite2(element.id, element)" style="background:white; width: 44px;">
+              <div class="star-button" style="vertical-align:middle">
+                  <i *ngIf="favoriteMap.has(element.id)" class="material-icons" style="margin: auto" >delete</i>
+                </div>
+              </div>
+          </td>
+        </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <div *ngIf="favoriteEvents && favoriteEvents.length == 0" [hidden]="!show_table || show_results">
+      <br><br><br><br>
+       <div class="alert alert-warning" role="alert">
+         No records.
+       </div>
+      <br><br><br><br>
+     </div>
+
+
+  <div [hidden]="show_table" [@tabsAnimation]="show_table ? 'event' : 'detail'">
+    <div *ngIf="!searchFail">
+        <h4 class="text-center"> {{event_selected}} </h4>
+        <div class="d-flex justify-content-end">
+            <div class="mr-auto">
+              <button style="display: flex" class="btn btn-light" (click)="clickList()"> <i class="material-icons" style="margin: auto" >chevron_left</i> <div>List</div> </button>
+            </div>
+            <div class="ml-auto d-flex justify-content-end">
+              <button type="button" class="twitterButton" (click)="clickTwitter()" style="margin-right: 5px;" ><img class="twitter" src="http://csci571.com/hw/hw8/Images/Twitter.png"></button>
+              <div *ngIf="favoriteMap.has(event_id_selected)"
+               class="star-button" (click)="clickFavorite2(event_id_selected, event_info_json_selected)" style="height:38px;"><i class="material-icons yellow-star">star</i>
+              </div>
+              <div *ngIf="!favoriteMap.has(event_id_selected)"
+               class="star-button" (click)="clickFavorite2(event_id_selected, event_info_json_selected)" style="height:38px;"><i class="material-icons">star_border</i>
+              </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs justify-content-end" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link" style="color: #0d60ff" [class.active]="selected_tab=='events'" id="nav-events"    (click)="selected_tab='events'">Events</a>
+          </li>
+            <li class="nav-item">
+            <a class="nav-link" style="color: #0d60ff" [class.active]="selected_tab=='photo'"  (click)= "selected_tab='photo'">Artist/Teams</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" style="color: #0d60ff" [class.active]="selected_tab=='venue'"   (click)= "selected_tab='venue'">Venue</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" style="color: #0d60ff" [class.active]="selected_tab=='upcoming'"    (click)= "selected_tab='upcoming'; sortEverything()">Upcoming Events</a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="infoTab" class="tab-pane" [class.show]="selected_tab=='events'" [class.active]="selected_tab=='events'"  role="tabpanel" aria-labelledby="info-tab">
+                <div class="y-scroll">
+                  <table *ngIf="event_info" class="table table-striped">
+                    <tbody>
+                      <tr *ngIf="event_info.artist_team">
+                        <th class="nowrap" scope="row"><b>Artist/Teams</b></th>
+                        <td class="nowrap">{{event_info.artist_team}}</td>
+                      </tr>
+                      <tr *ngIf="event_info.venue">
+                          <th class="nowrap" scope="row"><b>Venue</b></th>
+                          <td class="nowrap">{{event_info.venue}}</td>
+                        </tr>
+                      <tr *ngIf="event_info.time">
+                        <th class="nowrap" scope="row"><b>Time</b></th>
+                        <td class="nowrap">{{event_info.time}}</td>
+                      </tr>
+                      <tr *ngIf="event_info.category">
+                        <th class="nowrap" scope="row"><b>Category</b></th>
+                        <td class="nowrap">{{event_info.category}}</td>
+                      </tr>
+                      <tr *ngIf="event_info.ticket_status">
+                          <th class="nowrap" scope="row"><b>Ticket Status</b></th>
+                          <td class="nowrap">{{event_info.ticket_status}}</td>
+                      </tr>
+                      <tr *ngIf="event_info.buy_ticket_at">
+                          <th class="nowrap" scope="row"><b>Ticket Status</b></th>
+                          <td class="nowrap"><a href="{{event_info.buy_ticket_at}}" target="_blank">TicketMaster</a></td>
+                      </tr>
+                      <tr *ngIf="event_info.seat_map">
+                          <ng-template #content let-modal>
+                              <div class="modal-header">
+                                <h4 class="modal-title" id="modal-basic-title">Profile update</h4>
+                                <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <a href="{{event_info.seat_map}}" target="_blank">
+                                <img style="width: 100%; height: auto" src="{{event_info.seat_map}}">
+                                </a>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Close</button>
+                              </div>
+                            </ng-template>
+                          <th class="nowrap" scope="row"><b>Seat Map</b></th>
+                          <td class="nowrap event-blue-underline" (click)="openModal(content)">View Seat Map Here</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            <div id="photoTab" class="tab-pane" [class.show]="selected_tab=='photo'" [class.active]="selected_tab=='photo'"  role="tabpanel" aria-labelledby="photo-tab">
+              <div class="y-scroll">
+                <div *ngIf="musician_arr.length > 0">
+                  <div *ngFor="let artist of spotify_arr; let i = index">
+                    <div *ngIf="artist">
+                      <h5 class="text-center">{{artist.name}}</h5>
+                      <table class="table table-striped">
+                        <tbody>
+                          <tr *ngIf="artist.name">
+                            <th class="nowrap" scope="row"><b>Name</b></th>
+                            <td class="nowrap" scope="row"> {{artist.name}} </td>
+                          </tr>
+                          <tr *ngIf="artist.followers">
+                              <th class="nowrap" scope="row"><b>Followers</b></th>
+                              <td class="nowrap" scope="row"> {{artist.followers}} </td>
+                          </tr>
+                          <tr *ngIf="artist.popularity">
+                              <th class="nowrap" scope="row"><b>Popularity</b></th>
+                              <td class="nowrap" scope="row">
+                              <div style="display: flex">
+                                <round-progress [current]="artist.popularity" [max]="100" [radius]="20" [color]="'#86b846'" [stroke]="3" [clockwise]=false></round-progress>
+                                <div style="margin-left: -30px; margin-top: 8px;">{{artist.popularity}}</div>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr *ngIf="artist.url">
+                              <th class="nowrap" scope="row"><b>Check at</b></th>
+                              <td class="nowrap" scope="row"><a href="{{artist.url}}" target="_blank">Spotify</a> </td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <div *ngIf="photos_arr && photos_arr[i]">
+                        <div class="container">
+                          <div class="row imagetiles" >
+                              <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" *ngFor="let url of photos_arr[i].photos">
+                                  <a href="{{url}}" target="_blank">
+                                    <img src="{{url}}" class="img-responsive" style='width:100%;'>
+                                  </a>
+                                </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="musician_arr.length == 0">
+                  <div *ngFor="let team of photos_arr; let i = index">
+                    <div *ngIf="team">
+                      <h5 class="text-center">{{team.name}}</h5>
+                      <div *ngIf="photos_arr && photos_arr[i]">
+                          <div class="container">
+                            <div class="row imagetiles" >
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" *ngFor="let url of photos_arr[i].photos">
+                                    <a href="{{url}}" target="_blank">
+                                      <img src="{{url}}" class="img-responsive" style='width:100%;'>
+                                    </a>
+                                  </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="photos_arr.length == 0" [hidden]="selected_tab!='photo'">
+                <br><br><br><br>
+                 <div class="alert alert-warning" role="alert">
+                   No records.
+                 </div>
+                <br><br><br><br>
+              </div>
+
+            <div id="venueTab" class="tab-pane" [class.show]="selected_tab=='venue'" [class.active]="selected_tab=='venue'"  role="tabpanel" aria-labelledby="venue-tab">
+                <h5 *ngIf="venue_addr" class="text-center">{{venue_addr.name}}</h5>
+
+                <table *ngIf="venue_addr" class="table table-striped">
+                  <tbody>
+                      <tr *ngIf="venue_addr.address">
+                          <th scope="row"><b>Address</b></th>
+                          <td>{{venue_addr.address}}</td>
+                      </tr>
+                      <tr *ngIf="venue_addr.city">
+                          <th scope="row"><b>City</b></th>
+                          <td>{{venue_addr.city}}</td>
+                      </tr>
+                      <tr *ngIf="venue_addr.phoneNum">
+                          <th scope="row"><b>Phone Number</b></th>
+                          <td>{{venue_addr.phoneNum}}</td>
+                      </tr>
+                      <tr *ngIf="venue_addr.openHrs">
+                          <th scope="row"><b>Open Hours</b></th>
+                          <td>{{venue_addr.openHrs}}</td>
+                      </tr>
+                      <tr *ngIf="venue_addr.generalRule">
+                          <th scope="row"><b>General Rule</b></th>
+                          <td>{{venue_addr.generalRule}}</td>
+                      </tr>
+                      <tr *ngIf="venue_addr.childRule">
+                          <th scope="row"><b>Child Rule</b></th>
+                          <td>{{venue_addr.childRule}}</td>
+                      </tr>
+                  </tbody>
+                </table>
+                <div *ngIf="venue_addr">
+                    <agm-map [latitude]="venue_addr.lat" [longitude]="venue_addr.lng" [zoom]="15">
+                        <agm-marker [latitude]="venue_addr.lat" [longitude]="venue_addr.lng"></agm-marker>
+                    </agm-map>
+                </div>
+            </div>
+
+            <div *ngIf="!venue_addr" [hidden]="selected_tab!='venue'">
+                <br><br><br><br>
+                 <div class="alert alert-warning" role="alert">
+                   No records.
+                 </div>
+                <br><br><br><br>
+              </div>
+
+            <div *ngIf="sortedUpcoming.length > 0" id="upcomingTab" class="tab-pane" [class.show]="selected_tab=='upcoming'" [class.active]="selected_tab=='upcoming'"  role="tabpanel" aria-labelledby="venue-tab">
+                <div style="  display: flex; flex-direction: row; margin-top: 10; margin-bottom: 10">
+                    <div class="dropdown">
+                        <button id="dropdown1" class="btn btn-light dropdown-toggle" type="button" id="sortBy" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false">
+                          {{button1}}
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" (click)="clickDefault()">Default</a>
+                            <a class="dropdown-item" (click)="clickEvent()">Event Name</a>
+                            <a class="dropdown-item" (click)="clickTime()">Time</a>
+                            <a class="dropdown-item" (click)="clickArtist()">Artist</a>
+                            <a class="dropdown-item" (click)="clickType()">Type</a>
+                        </div>
+                      </div>
+
+                      <div class="dropdown">
+                        <button id="dropdown2" class="btn btn-light dropdown-toggle" type="button" id="Order" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false" [disabled]="sortBy == 'default'">
+                        {{button2}}
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" (click)="clickAsd()">Ascending</a>
+                            <a class="dropdown-item" (click)="clickDesc()">Descending</a>
+                        </div>
+                      </div>
+                </div>
+
+
+                  <div *ngFor="let entry of sortedUpcoming; let i = index" class="card w-100" [ngClass]="{'no-border': i > 4 && hideRows}">
+                      <div *ngIf="i<=4" class="card-body">
+                        <table>
+                            <tr>
+                                <td  valign="top">
+                                    <div class = "event-blue-underline" style="color: #0d60ff; font-weight: 500" ><a href="{{entry.url}}" target="_blank">{{entry.name}}</a></div>
+                                    <div><span style="color: #e2652a;">Artist: {{entry.artist}}  </span><span style="color: gray">{{entry.dateTime}}</span></div>
+                                    <div>Type {{entry.type}}</div>
+                                  </td>
+                            </tr>
+                          </table>
+                      </div>
+                      <div *ngIf="i>4" class="card-body" [@toggleRows] ="hideRows ? 'less' : 'more'">
+                          <table>
+                              <tr>
+                                <td  valign="top">
+                                  <div class = "event-blue-underline" style="color: #0d60ff; font-weight: 500" ><a href="{{entry.url}}" target="_blank">{{entry.name}}</a></div>
+                                  <div><span style="color: #e2652a;">Artist: {{entry.artist}}  </span><span style="color: gray">{{entry.dateTime}}</span></div>
+                                  <div>Type {{entry.type}}</div>
+                                </td>
+                              </tr>
+                            </table>
+                        </div>
+                  </div>
+
+                  <div style="text-align: center;">
+                    <button *ngIf="sortedUpcoming.length > 5" style="background-color: #0d60ff; color: white;" (click) = "toggleRows()">{{toggleRowsButtonName}}</button>
+                  </div>
+
+
+
+                </div>
+            </div>
+
+            <div *ngIf="sortedUpcoming.length == 0" [hidden]="selected_tab!='upcoming'">
+                <br><br><br><br>
+                 <div class="alert alert-warning" role="alert">
+                   No records.
+                 </div>
+                <br><br><br><br>
+              </div>
+
+        </div>
+
+
+    <div *ngIf="searchFail">
+        <br><br><br><br>
+        <div class="alert alert-danger" role="alert">
+          Failed to get search results.
+        </div>
+        <br><br><br><br>
+      </div>
+  </div>
+
+

@@ -1,0 +1,80 @@
+
+agm-map {
+  height: 500px;
+}
+
+table {
+  width: 100%;
+}
+
+.y-scroll {
+  overflow-y: scroll;
+}
+.nowrap{
+	white-space: nowrap;
+}
+
+.twitter {
+	width: 44px;
+	height: 38px;
+}
+.twitterButton {
+	padding: 0;
+	margin-bottom: 10px;
+	border: none;
+}
+.twitterButton:focus {
+	outline: none;
+    border-color: transparent;
+    box-shadow:none;
+}
+.twitterButton:hover {
+	border: none;
+	cursor:hand;
+}
+.yellow-star {
+	color: rgb(249, 213, 86);
+}
+.yellow-star:hover {
+	color: rgb(249, 213, 86);
+}
+
+.white-star {
+	color: white;
+}
+.white-star:hover {
+	color: white;
+}
+
+.event-blue-underline {
+  color: #0d60ff;
+}
+
+.event-blue-underline:hover {
+  color: #0d60ff;
+  text-decoration: underline;
+}
+
+.mat-row:hover {
+  background-color: #f7f5f7;
+}
+
+.selected {
+  background: #fbd587;
+}
+
+.no-border {
+  border: none;
+}
+
+.star-button {
+  border-color: #eaeaea;
+  border-style: solid;
+  height: 38px;
+  width: 44px;
+  border-width: thin;
+  text-align: center;
+  /* display: table-cell; */
+  /* vertical-align: middle; */
+  padding-top: 6px;
+}

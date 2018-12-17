@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<div class="outer rounded p-3 container col-md-10" id="homeForm">
+  <div class="container col-md-9" >
+    <form #searchForm="ngForm" (ngSubmit)="submitSearch(searchForm)" method="get" >
+
+      <div class="form-group row d-flex justify-content-center">
+        <h4 class="text-center">Entertainment Event Ticket Search</h4>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-sm-3 col-form-label">Keyword<span style = "color: red;"> *</span></label>
+        <div class="col-sm-9">
+          <input type="text" name="keyword" id="keyword" class="form-control" required placeholder="Enter Artist, Team or Event Name (eg. Lakers)"
+          (keyup)="onKey($event)" [matAutocomplete]="auto"  pattern="\s*\S+[\s\S]*" ngModel #keyword="ngModel" [(ngModel)]="keywordValue"
+          matInput>
+          <mat-autocomplete #auto="matAutocomplete">
+              <mat-option *ngFor="let option of options" [value]="option">
+                  {{option}}
+                </mat-option>
+          </mat-autocomplete>
+          <div style = "color: red;" *ngIf="keyword.invalid && keyword.touched">Please enter a keyword.</div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-sm-3 col-form-label" for="category">Category</label>
+        <div class="col-sm-3">
+          <select id="category" class="custom-select" name="category" [(ngModel)]="category">
+            <option *ngFor="let category of categories" [value]="category.value">
+              {{ category.type }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+          <label class="col-sm-3 col-form-label" for="input">Distance</label>
+          <div class="col-sm-3">
+            <input type="text" id="distance" name="distance" class="form-control" placeholder="10" [(ngModel)]="distance">
+          </div>
+          <div class="col-sm-3">
+            <select id="unit" class="custom-select" name="unit" [(ngModel)]="unit">
+              <option *ngFor="let unit of units" [value]="unit.value">
+                {{ unit.type }}
+              </option>
+            </select>
+          </div>
+      </div>
+
+      <div class="form-group row">
+          <label class="col-sm-3 col-form-label" for="from">Form<span style = "color: red;"> *</span></label>
+          <div class="col-sm-9">
+            <div class="">
+              <input type="radio"  name="from"  value="here" (click)=local_check_flag(1) checked> Current Location
+            </div>
+            <div class="">
+              <input type="radio"  name="from"  value="other" (click)=local_check_flag(2)> Other. Please specify:
+            </div>
+            <div class="">
+              <input type="text" id="location" class="form-control" name="location"  [(ngModel)]="locationValue" #location="ngModel" required [disabled]="checkLocal"  pattern="\s*\S+[\s\S]*">
+              <div style = "color: red;" *ngIf="!location.valid && location.touched && !checkLocal">Please enter a location.</div>
+            </div>
+
+          </div>
+
+      </div>
+      <!-- <input type="text" class="form-control" name="company-name" #actionType="ngModel" ngModel required #nameField="ngModel"> -->
+      <!-- <div class="alert alert-danger" *ngIf="nameField.errors?.required">The company name is required</div>-->
+      <div style="display: flex">
+        <button class="btn btn-primary" style="display:flex;" [disabled]="!searchForm?.valid"><i class="material-icons">search</i> <div>Search</div> </button>
+        <button class="btn btn-default"style="margin-left: 10px; display: flex"  (click)="clickClear()"><i class="material-icons">clear_all</i>Clear</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="outer rounded p-3 container col-md-10">
+
+  <br>
+  <div class="text-center container" [hidden]="submitted">
+      <button class="btn" [class.btn-primary]="true" [class.btn-link]="false">Results</button>
+      <button class="btn" [class.btn-primary]="false" [class.btn-link]="true" (click)="alertFav()">Favorites</button>
+    </div>
+
+  <app-event-table [events]="eventData" [hidden] = "!submitted || cleared">
+
+  </app-event-table>
+  <div *ngIf="cleared" class="text-center container">
+		<button class="btn" [class.btn-primary]="true" [class.btn-link]="false">Results</button>
+		<button class="btn" [class.btn-primary]="false" [class.btn-link]="true" (click)="alertFav()">Favorites</button>
+  </div>
+  <br>
+  <br>
+  <br>
+  <div class="progress" [hidden]="!showProgress">
+      <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+  </div>
+
+  <div *ngIf="searchFail">
+      <br><br><br><br>
+       <div class="alert alert-danger" role="alert">
+         Fail to get search results.
+       </div>
+      <br><br><br><br>
+     </div>
+</div>
+
+
